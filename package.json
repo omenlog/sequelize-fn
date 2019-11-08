@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "crocks": "^0.12.4"
+    "crocks": "^0.12.4",
+    "mysql2": "^2.0.0",
+    "sequelize": "^5.21.2"
   }
 }
