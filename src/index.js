@@ -1,30 +1,59 @@
+const fs = require("fs");
 const Sequelize = require("sequelize");
-const State = require("crocks/State");
 const pipe = require("crocks/helpers/pipe");
-const Pair = require("crocks/Pair");
+const getPath = require("crocks/Maybe/getPath");
+const path = require("path");
+const either = require("crocks/pointfree/either");
+const map = require("crocks/pointfree/map");
+const tryCatch = require("crocks/Result/tryCatch");
+const converge = require("crocks/combinators/converge");
+const identity = require("ramda/src/identity");
+const forEach = require("ramda/src/forEach");
 
-const getState = () => State(s => Pair(s, s));
+const initSequelize = config =>
+  new Sequelize(config.sequelize.dataBaseUri, config.sequelize.options);
 
-function mapper(s) {
-  console.log(s);
-  return s + 10;
-}
+// readModelsFiles :: String -> [String]
+const readModelsFiles = location => tryCatch(() => fs.readdirSync(location))();
 
-const buildSequelize = config =>
-  getState()
-    .map(config => new Sequelize(config.dataBaseUri, config.options))
-    .runWith(config);
+const error = message => e => {
+  console.log(`${message}\n${e}`);
+  process.exit(0);
+};
 
-const getModels = s => console.log(s.fst().sync());
-
-const logger = s => console.log(`State: ${s.snd()} Value: ${s.fst()}`);
-
-const test = pipe(
-  buildSequelize,
-  getModels
+const getModelsDir = pipe(
+  getPath(["sequelize", "modelsDir"]),
+  either(error("Invalid Models Configuration"), identity)
 );
 
-test({
-  dataBaseUri: "mysql://root:password@lsocalhost/test",
-  options: { dialect: "mysql" }
+const buildModelsPaths = modelsDir =>
+  map(modelName => path.join(modelsDir, modelName));
+
+// getModelsDefinition :: Object -> [String]
+const getModelsDefinitions = modelsDir =>
+  pipe(
+    readModelsFiles,
+    either(error("Error Reading models"), buildModelsPaths(modelsDir))
+  )(modelsDir);
+
+const getModels = pipe(
+  getModelsDir,
+  getModelsDefinitions
+);
+
+const importModels = (sequelize, modelsDefinitions) => {
+  forEach(model => sequelize.import(model), modelsDefinitions);
+  return sequelize;
+};
+
+const importer = converge(importModels, initSequelize, getModels);
+
+const seq = importer({
+  sequelize: {
+    modelsDir: "C:\\Users\\omar.lopez\\Projects\\models-importer\\models",
+    dataBaseUri: "mysql://root:password@lsocalhost/test",
+    options: { dialect: "mysql" }
+  }
 });
+
+console.log(seq.models);
