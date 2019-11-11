@@ -1,6 +1,7 @@
 const fs = require("fs");
 const Sequelize = require("sequelize");
 const pipe = require("crocks/helpers/pipe");
+const getPathOr = require("crocks/helpers/getPathOr");
 const getPath = require("crocks/Maybe/getPath");
 const path = require("path");
 const either = require("crocks/pointfree/either");
@@ -10,16 +11,28 @@ const converge = require("crocks/combinators/converge");
 const identity = require("ramda/src/identity");
 const forEach = require("ramda/src/forEach");
 
-const initSequelize = config =>
-  new Sequelize(config.sequelize.dataBaseUri, config.sequelize.options);
-
-// readModelsFiles :: String -> [String]
-const readModelsFiles = location => tryCatch(() => fs.readdirSync(location))();
-
 const error = message => e => {
   console.log(`${message}\n${e}`);
   process.exit(0);
 };
+
+const getSequelizeOptions = getPathOr({}, ["sequelize", "options"]);
+const getSequelizeUri = pipe(
+  getPath(["sequelize", "dataBaseUri"]),
+  either(error("Sequelize Uri Missing"), identity)
+);
+
+const createSequelizeInstance = (dataBaseUri, options) =>
+  new Sequelize(dataBaseUri, options);
+
+const initSequelize = converge(
+  createSequelizeInstance,
+  getSequelizeUri,
+  getSequelizeOptions
+);
+
+// readModelsFiles :: String -> [String]
+const readModelsFiles = location => tryCatch(() => fs.readdirSync(location))();
 
 const getModelsDir = pipe(
   getPath(["sequelize", "modelsDir"]),
