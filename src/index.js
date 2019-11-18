@@ -3,7 +3,6 @@ const Sequelize = require("sequelize");
 const pipe = require("crocks/helpers/pipe");
 const getPathOr = require("crocks/helpers/getPathOr");
 const IO = require("crocks/IO");
-const tap = require("crocks/helpers/tap");
 const getPath = require("crocks/Maybe/getPath");
 const path = require("path");
 const either = require("crocks/pointfree/either");
@@ -12,7 +11,6 @@ const run = require("crocks/pointfree/run");
 const tryCatch = require("crocks/Result/tryCatch");
 const converge = require("crocks/combinators/converge");
 const identity = require("ramda/src/identity");
-const when = require("ramda/src/when");
 const forEach = require("ramda/src/forEach");
 const isDefined = require("crocks/predicates/isDefined");
 
@@ -23,15 +21,20 @@ const error = message => e => {
   process.exit(0);
 };
 
+// getSequelizeOptions :: Object a => a -> a
 const getSequelizeOptions = getPathOr({}, ["sequelize", "options"]);
+
+// getSequelizeUri :: Object a => a -> String
 const getSequelizeUri = pipe(
   getPath(["sequelize", "dataBaseUri"]),
   either(error("Sequelize Uri Missing"), identity)
 );
 
+// createSequelizeInstance :: Object a , Sequelize s => (String,a) -> s
 const createSequelizeInstance = (dataBaseUri, options = {}) =>
   new Sequelize(dataBaseUri, options);
 
+// initSequelize :: Object a , Sequelize s => a -> s|
 const initSequelize = converge(
   createSequelizeInstance,
   getSequelizeUri,
@@ -42,11 +45,13 @@ const initSequelize = converge(
 const readModelsFiles = location =>
   IO.of(() => tryCatch(() => fs.readdirSync(location))());
 
+// getModelsDir :: Object a =>  a -> String
 const getModelsDir = pipe(
   getPath(["sequelize", "modelsDir"]),
   either(error("Invalid Models Configuration"), identity)
 );
 
+// buildModelsPaths :: String -> [String] -> [String]
 const buildModelsPaths = modelsDir =>
   map(modelName => path.join(modelsDir, modelName));
 
@@ -72,6 +77,7 @@ const importModels = (sequelize, modelsDefinitions) =>
     return sequelize;
   });
 
+// importer :: Object a, Sequelize s => (a, (s -> s)) -> IO(s) | s
 const importer = (config, afterFn = identity) =>
   pipe(
     converge(importModels, initSequelize, getModels),
@@ -80,11 +86,5 @@ const importer = (config, afterFn = identity) =>
     seqIO => (config.sequelize.lazy === true ? seqIO : seqIO())
   )(config);
 
-const sequelize = importer({
-  sequelize: {
-    modelsDir: "C:\\Users\\omar.lopez\\Projects\\models-importer\\models",
-    dataBaseUri: "mysql://root:password@lsocalhost/test"
-  }
-});
 
-console.log(sequelize.models);
+module.exports = importer;
