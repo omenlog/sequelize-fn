@@ -14,11 +14,8 @@ const identity = require("ramda/src/identity");
 const forEach = require("ramda/src/forEach");
 const isDefined = require("crocks/predicates/isDefined");
 
-const error = message => e => {
-  console.log(message);
-  console.log("\n");
-  isDefined(e) && console.log(e);
-  process.exit(0);
+const error = message => () => {
+  throw new Error(message);
 };
 
 // getSequelizeOptions :: Object a => a -> a
@@ -85,6 +82,5 @@ const importer = (config, afterFn = identity) =>
     run,
     seqIO => (config.sequelize.lazy === true ? seqIO : seqIO())
   )(config);
-
 
 module.exports = importer;
