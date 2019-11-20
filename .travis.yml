@@ -4,7 +4,7 @@ node_js:
   - "8"
 
 script: npm run test:coverage
-after_sucess: npm run coveralls
+after_success: npm run coveralls
 
 cache:
   directories:
