@@ -51,4 +51,22 @@ describe("Sequelize Importer", () => {
 
     expect(typeof seqInstance).toBe("function");
   });
+
+  test("It executing asynchronously the function that you passed as second argument", () => {
+    const seqConfig = {
+      sequelize: {
+        modelsDir: "/path/to/models",
+        dataBaseUri: "mysql://root:password@lsocalhost/test"
+      }
+    };
+
+    /* This function return sequelize instance as argument and return in and automatic way */
+    const afterFn = seq => {
+      seq.executed = true;
+    };
+
+    const result = importer(seqConfig, afterFn);
+
+    expect(result.executed).toBeTruthy();
+  });
 });
