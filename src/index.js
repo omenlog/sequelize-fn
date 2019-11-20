@@ -7,12 +7,12 @@ const getPath = require("crocks/Maybe/getPath");
 const path = require("path");
 const either = require("crocks/pointfree/either");
 const map = require("crocks/pointfree/map");
+const tap = require("crocks/helpers/tap");
 const run = require("crocks/pointfree/run");
 const tryCatch = require("crocks/Result/tryCatch");
 const converge = require("crocks/combinators/converge");
 const identity = require("ramda/src/identity");
 const forEach = require("ramda/src/forEach");
-const isDefined = require("crocks/predicates/isDefined");
 
 const error = message => () => {
   throw new Error(message);
@@ -78,7 +78,7 @@ const importModels = (sequelize, modelsDefinitions) =>
 const importer = (config, afterFn = identity) =>
   pipe(
     converge(importModels, initSequelize, getModels),
-    map(fn => pipe(fn, afterFn)),
+    map(fn => pipe(fn, tap(afterFn))),
     run,
     seqIO => (config.sequelize.lazy === true ? seqIO : seqIO())
   )(config);
