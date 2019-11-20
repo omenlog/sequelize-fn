@@ -3,4 +3,9 @@ languague: node_js
 node_js:
   - "8"
 
-script: npm run test
+script: npm run test:coverage
+after_sucess: npm run coveralls
+
+cache:
+  directories:
+    - "node_modules"
