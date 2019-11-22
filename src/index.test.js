@@ -31,10 +31,8 @@ describe("Sequelize Importer", () => {
 
   test("It import the correct ammount of models", () => {
     const seqInstance = importer({
-      sequelize: {
-        modelsDir: "/path/to/models",
-        dataBaseUri: "mysql://root:password@lsocalhost/test"
-      }
+      modelsDir: "/path/to/models",
+      dataBaseUri: "mysql://root:password@lsocalhost/test"
     });
 
     expect(seqInstance.import.mock.calls.length).toBe(1);
@@ -42,11 +40,9 @@ describe("Sequelize Importer", () => {
 
   test("It can have a lazy behavior configured by the user", () => {
     const seqInstance = importer({
-      sequelize: {
-        lazy: true,
-        modelsDir: "/path/to/models",
-        dataBaseUri: "mysql://root:password@lsocalhost/test"
-      }
+      lazy: true,
+      modelsDir: "/path/to/models",
+      dataBaseUri: "mysql://root:password@lsocalhost/test"
     });
 
     expect(typeof seqInstance).toBe("function");
@@ -54,10 +50,8 @@ describe("Sequelize Importer", () => {
 
   test("It executing asynchronously the function that you passed as second argument", () => {
     const seqConfig = {
-      sequelize: {
-        modelsDir: "/path/to/models",
-        dataBaseUri: "mysql://root:password@lsocalhost/test"
-      }
+      modelsDir: "/path/to/models",
+      dataBaseUri: "mysql://root:password@lsocalhost/test"
     };
 
     /* This function return sequelize instance as argument and return in and automatic way */
