@@ -11,6 +11,7 @@ const tap = require("crocks/helpers/tap");
 const run = require("crocks/pointfree/run");
 const tryCatch = require("crocks/Result/tryCatch");
 const converge = require("crocks/combinators/converge");
+const isTruthy = require("crocks/predicates/isTruthy");
 const identity = require("ramda/src/identity");
 const forEach = require("ramda/src/forEach");
 
@@ -28,7 +29,7 @@ const getSequelizeUri = pipe(
 );
 
 // createSequelizeInstance :: Object a , Sequelize s => (String,a) -> s
-const createSequelizeInstance = (dataBaseUri, options = {}) =>
+const createSequelizeInstance = (dataBaseUri, options) =>
   new Sequelize(dataBaseUri, options);
 
 // initSequelize :: Object a , Sequelize s => a -> s|
@@ -38,7 +39,7 @@ const initSequelize = converge(
   getSequelizeOptions
 );
 
-// readModelsFiles :: String -> IO([String])
+// readModelsFiles :: String -> IO(Result e [String])
 const readModelsFiles = location =>
   IO.of(() => tryCatch(() => fs.readdirSync(location))());
 
@@ -48,39 +49,38 @@ const getModelsDir = pipe(
   either(error("Invalid Models Configuration"), identity)
 );
 
+// mapIO :: (a -> b) -> IO(a) -> (a -> b)
+const mapIO = fn => crocksIO => crocksIO.map(ioFn => pipe(ioFn, fn));
+
 // buildModelsPaths :: String -> [String] -> [String]
 const buildModelsPaths = modelsDir =>
   map(modelName => path.join(modelsDir, modelName));
 
+// processFileOf :: String -> (IO(Result([String])) -> [String])
+const processFileOf = modelsDir =>
+  mapIO(either(error("Error Reading models"), buildModelsPaths(modelsDir)));
+
 // getModelsDefinition :: String -> IO ([String])
 const getModelsDefinitions = modelsDir =>
-  pipe(
-    readModelsFiles,
-    map(fn =>
-      pipe(
-        fn,
-        either(error("Error Reading models"), buildModelsPaths(modelsDir))
-      )
-    )
-  )(modelsDir);
+  pipe(readModelsFiles, processFileOf(modelsDir))(modelsDir);
 
 // getModels :: Object -> IO([String])
 const getModels = pipe(getModelsDir, getModelsDefinitions);
 
 // importModels :: Seq s => (s, IO([String])) -> IO(s)
-const importModels = (sequelize, modelsDefinitions) =>
+const importDefinitions = (sequelize, modelsDefinitions) =>
   modelsDefinitions.map(fn => () => {
     forEach(model => sequelize.import(model), fn());
     return sequelize;
   });
 
+const importModels = converge(importDefinitions, initSequelize, getModels);
+const setupAfterHook = (fn = identity) => mapIO(tap(fn));
+const finish = config => seqIO =>
+  isTruthy(config.sequelize.lazy) ? seqIO : seqIO();
+
 // importer :: Object a, Sequelize s => (a, (s -> s)) -> IO(s) | s
-const importer = (config, afterFn = identity) =>
-  pipe(
-    converge(importModels, initSequelize, getModels),
-    map(fn => pipe(fn, tap(afterFn))),
-    run,
-    seqIO => (config.sequelize.lazy === true ? seqIO : seqIO())
-  )(config);
+const importer = (config, fn) =>
+  pipe(importModels, setupAfterHook(fn), run, finish(config))(config);
 
 module.exports = importer;
