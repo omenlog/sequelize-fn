@@ -26,7 +26,7 @@ At the same time sufficient flexibility is maintained in case you want to execut
 This is a [Node.js](http://nodejs.org) module available through the [npm registry](http://npmjs.com).
 
 ```sh
-$ npm install seqfn
+$ npm install sequelize-fn
 ```
 
 ## Usage
