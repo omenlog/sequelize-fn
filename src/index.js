@@ -1,9 +1,9 @@
 const fs = require("fs");
 const Sequelize = require("sequelize");
 const pipe = require("crocks/helpers/pipe");
-const getPathOr = require("crocks/helpers/getPathOr");
+const getPropOr = require("crocks/helpers/getPropOr");
 const IO = require("crocks/IO");
-const getPath = require("crocks/Maybe/getPath");
+const getProp = require("crocks/Maybe/getProp");
 const path = require("path");
 const either = require("crocks/pointfree/either");
 const map = require("crocks/pointfree/map");
@@ -20,11 +20,11 @@ const error = message => () => {
 };
 
 // getSequelizeOptions :: Object a => a -> a
-const getSequelizeOptions = getPathOr({}, ["sequelize", "options"]);
+const getSequelizeOptions = getPropOr({}, "options");
 
 // getSequelizeUri :: Object a => a -> String
 const getSequelizeUri = pipe(
-  getPath(["sequelize", "dataBaseUri"]),
+  getProp("dataBaseUri"),
   either(error("Sequelize Uri Missing"), identity)
 );
 
@@ -45,7 +45,7 @@ const readModelsFiles = location =>
 
 // getModelsDir :: Object a =>  a -> String
 const getModelsDir = pipe(
-  getPath(["sequelize", "modelsDir"]),
+  getProp("modelsDir"),
   either(error("Invalid Models Configuration"), identity)
 );
 
@@ -76,8 +76,7 @@ const importDefinitions = (sequelize, modelsDefinitions) =>
 
 const importModels = converge(importDefinitions, initSequelize, getModels);
 const setupAfterHook = (fn = identity) => mapIO(tap(fn));
-const finish = config => seqIO =>
-  isTruthy(config.sequelize.lazy) ? seqIO : seqIO();
+const finish = config => seqIO => (isTruthy(config.lazy) ? seqIO : seqIO());
 
 // importer :: Object a, Sequelize s => (a, (s -> s)) -> IO(s) | s
 const importer = (config, fn) =>
