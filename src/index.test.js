@@ -1,6 +1,7 @@
 "use strict";
 
 const importer = require("./");
+const { runAssociations } = require("./");
 const fs = require("fs");
 
 jest.mock("sequelize");
@@ -62,5 +63,21 @@ describe("Sequelize Importer", () => {
     const result = importer(seqConfig, afterFn);
 
     expect(result.executed).toBeTruthy();
+  });
+
+  test("it run associations correctlty", done => {
+    const sequelize = {
+      models: {
+        Users: {
+          associate: models => {
+            expect(models.Teams).toBeDefined();
+            done();
+          }
+        },
+        Teams: {}
+      }
+    };
+
+    runAssociations(sequelize);
   });
 });
