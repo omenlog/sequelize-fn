@@ -11,7 +11,28 @@ This library can be used to completely configure a sequelize, in a simple functi
 
 ## Motivation
 
-This library arises with the simple objective of wrapping in a simple function the steps that enerally were performed when sequelize is configured in one application.
+This library arises after identifying some deficiencies in the approach taked by `sequelize-cli` to automate the creation of sequelize instance and import the models over it.
+
+When we use the `sequelize-cli` to generate our models, it generates an "index.js" file in the models folder which contains the logic necessary to create the sequelize instance and import the models.
+
+One of the disadvantages of it's approach is that it restricts us to having only one instance of sequelize in our application, so if 2 or more are needed it would be necessary to do the entire process manually,with `sequelize-fn` would be 2 or more calls to function, which gives the user more flexibility.
+
+Another disadvantage of the method used by the climate is that it does not make the flow of configuring the ORM compliable, so if this behavior is desired it is necessary to implement a mechanism by the user.
+
+`sequelize-fn` as it is a function admits the composition in a much more natural way being able to implement the different processes of our application following a much more declarative approach, for example:
+
+```js
+const seqFn = require("sequelize-fn");
+const setupSequelize = seqFn;
+const initApp = compose(setupExpress, setupSequelize);
+initApp(config);
+```
+
+Another improvement in the process of configuring sequelize, is that the cli provides us with an eager approach, so in case a lazy behavior is required it is necessary to implement manually.
+
+`sequelize-fn` supports an eager approach but it can be configurable to behave lazily in case it is needed, just by passing the `lazy` property equal to `true` in the sequelize-fn configuration object it will return a function that when executed is that the instance will be created.
+
+with the simple objective of wrapping in a simple function the steps that enerally were performed when sequelize is configured in one application.
 
 Is considered that the most common operations when instantiating sequelize are:
 
@@ -53,7 +74,7 @@ const sequelize = seqFn(config);
 
 - `options`: Options object used as argument in sequelize constructor you can consult the full sequelize [documentation](https://sequelize.org/v5/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor)
 
-- lazy: Boolean flag to indicate the lazy behavior of the function, using a lazy behavior the call to `seqFn` not return a sequelize instance, but a function that when executed is that the instance is created
+- `lazy`: Boolean flag to indicate the lazy behavior of the function, using a lazy behavior the call to `seqFn` not return a sequelize instance, but a function that when executed is that the instance is created
 
 ## Executing hook function before return sequelize instance
 
