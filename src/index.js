@@ -7,6 +7,7 @@ const getProp = require("crocks/Maybe/getProp");
 const path = require("path");
 const either = require("crocks/pointfree/either");
 const map = require("crocks/pointfree/map");
+const filter = require("crocks/pointfree/filter");
 const tap = require("crocks/helpers/tap");
 const run = require("crocks/pointfree/run");
 const tryCatch = require("crocks/Result/tryCatch");
@@ -58,7 +59,15 @@ const buildModelsPaths = modelsDir =>
 
 // processFileOf :: String -> (IO(Result([String])) -> [String])
 const processFileOf = modelsDir =>
-  mapIO(either(error("Error Reading models"), buildModelsPaths(modelsDir)));
+  mapIO(
+    either(
+      error("Error Reading models"),
+      pipe(filterFiles, buildModelsPaths(modelsDir))
+    )
+  );
+
+// filterFiles :: [String] -> [String]
+const filterFiles = filter(fileName => fileName.slice(-3) === ".js");
 
 // getModelsDefinition :: String -> IO ([String])
 const getModelsDefinitions = modelsDir =>
