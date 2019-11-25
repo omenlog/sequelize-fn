@@ -6,12 +6,12 @@ const fs = require("fs");
 jest.mock("sequelize");
 jest.mock("fs");
 
-const userPath = "/path/to/models/user.js";
-
 describe("Sequelize Importer", () => {
   beforeAll(() => {
     const MOCK_FILES = {
-      [userPath]: "user.js"
+      ["/path/to/models/user.js"]: "user.js",
+      ["/path/to/models/user.map"]: "user.map",
+      ["/path/to/models/user.ts"]: "user.ts"
     };
 
     fs.__setMockFiles(MOCK_FILES);
