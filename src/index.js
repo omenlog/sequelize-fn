@@ -13,6 +13,8 @@ const run = require("crocks/pointfree/run");
 const tryCatch = require("crocks/Result/tryCatch");
 const converge = require("crocks/combinators/converge");
 const isTruthy = require("crocks/predicates/isTruthy");
+const values = require("ramda/src/values");
+const curry = require("crocks/helpers/curry");
 const identity = require("ramda/src/identity");
 const forEach = require("ramda/src/forEach");
 
@@ -38,6 +40,17 @@ const initSequelize = converge(
   createSequelizeInstance,
   getSequelizeUri,
   getSequelizeOptions
+);
+
+const associate = curry((sequelize, models) => {
+  forEach(
+    model => model.associate && model.associate(sequelize.models),
+    models
+  );
+});
+
+const runAssociations = tap(sequelize =>
+  pipe(getProp("models"), map(values), map(associate(sequelize)))(sequelize)
 );
 
 // readModelsFiles :: String -> IO(Result e [String])
@@ -89,6 +102,13 @@ const finish = config => seqIO => (isTruthy(config.lazy) ? seqIO : seqIO());
 
 // importer :: Object a, Sequelize s => (a, (s -> s)) -> IO(s) | s
 const importer = (config, fn) =>
-  pipe(importModels, setupAfterHook(fn), run, finish(config))(config);
+  pipe(
+    importModels,
+    runAssociations,
+    setupAfterHook(fn),
+    run,
+    finish(config)
+  )(config);
 
 module.exports = importer;
+module.exports.runAssociations = runAssociations;
