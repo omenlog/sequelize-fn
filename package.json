@@ -1,16 +1,16 @@
 {
-  "name": "models-importer",
+  "name": "sequelize-fn",
   "version": "1.0.0",
-  "description": "",
+  "description": "Simple function to fully setup sequelize instances",
   "main": "./src/index.js",
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["sequelize","javascript","orm"],
+  "author": "Omar E. Lopez Gonzalez <omar.enrique1211@gmail.com> (https://github.com/omenlogo)",
+  "license": "MIT",
   "dependencies": {
     "crocks": "^0.12.4",
     "mysql2": "^2.0.0",
