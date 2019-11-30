@@ -1,7 +1,7 @@
 # sequelize-fn
 
-[![Build Status](https://travis-ci.com/omenlogo/models-importer.svg?token=qhbienrBBMKjdQWQ2vXq&branch=master)](https://travis-ci.com/omenlogo/models-importer)
-[![Coverage Status](https://coveralls.io/repos/github/omenlogo/models-importer/badge.svg?branch=master)](https://coveralls.io/github/omenlogo/models-importer?branch=master)
+[![Build Status](https://travis-ci.com/omenlogo/sequelize-fn.svg?branch=master)](https://travis-ci.com/omenlogo/sequelize-fn)
+[![Coverage Status](https://coveralls.io/repos/github/omenlogo/sequelize-fn/badge.svg?branch=master)](https://coveralls.io/github/omenlogo/sequelize-fn?branch=master)
 
 A simple package to setup `sequelize` in a very straightforward way.
 
