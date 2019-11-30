@@ -63,7 +63,7 @@ const sequelize = seqFn(config);
 
 Is mandatory that `dataBaseUri` and `modelsDir` must be present in the config object, if not the library will throw and error.
 
-## Configurarion
+## Configuration
 
 - `dataBaseUri`:
   String used to establish connection with the database , it must be in the following format `dialect://user:pass@host:[port]/database`
