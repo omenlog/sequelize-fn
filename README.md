@@ -61,16 +61,16 @@ const config = {
 const sequelize = seqFn(config);
 ```
 
-Is mandatory that `dataBaseUri` and `modelsDir` must be present in the config object, if not the library will throw and error.
+> `dataBaseUri` and `modelsDir` are mandatory in the config object, if not the library will throw and error.
 
 ## Configuration
 
 - `dataBaseUri`:
-  String used to establish connection with the database , it must be in the following format `dialect://user:pass@host:[port]/database`
+  String used to establish connection with the database , it must be in the following format `dialect://user:pass@host:[port]/database`.
 
-- `modelsDir`: Absolute path for directory when models are declared
+- `modelsDir`: Absolute path for directory where models are located.
 
-- `options`: Options object used as argument in sequelize constructor you can consult the full sequelize [documentation](https://sequelize.org/v5/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor)
+- `options`: Options object used as argument in sequelize constructor you can consult the full sequelize [documentation](https://sequelize.org/v5/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor).
 
 - `lazy`: Boolean flag to indicate the lazy behavior of the function, when this it's `true` the call to `seqFn` not return a sequelize instance, but a function that when executed is that the flow for setup sequelize run.
 
