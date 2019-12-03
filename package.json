@@ -15,6 +15,10 @@
   ],
   "author": "Omar E. Lopez Gonzalez <omar.enrique1211@gmail.com> (https://github.com/omenlogo)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omenlogo/sequelize-fn"
+  },
   "dependencies": {
     "crocks": "^0.12.4",
     "mysql2": "^2.0.0",
